@@ -1,6 +1,6 @@
 import os
 import sys
-from anthropic import Anthropic
+from anthropic import Anthropic, NOT_GIVEN
 from airflow_llm_plugin.llm.base import LLMClient
 
 class AnthropicClient(LLMClient):
@@ -12,19 +12,11 @@ class AnthropicClient(LLMClient):
         Args:
             model_name (str, optional): The model to use
         """
-        # the newest Anthropic model is "claude-3-5-sonnet-20241022" which was released October 22, 2024
-        # do not change this unless explicitly requested by the user
-        model_name = model_name or "claude-3-5-sonnet-20241022"
         super().__init__(model_name)
         
-        # Initialize the Anthropic client
-        api_key = os.environ.get("ANTHROPIC_API_KEY")
-        if not api_key:
-            raise ValueError("ANTHROPIC_API_KEY environment variable must be set")
-        
-        self.client = Anthropic(api_key=api_key)
+        self.client = Anthropic(api_key=self.config.api_key)
     
-    def get_completion(self, prompt, system_prompt=None, max_tokens=None):
+    def get_completion(self, prompt, system_prompt=None, max_tokens=20, tools=NOT_GIVEN):
         """Get a completion from Anthropic.
         
         Args:
@@ -36,17 +28,18 @@ class AnthropicClient(LLMClient):
             str: The LLM's completion text
         """
         response = self.client.messages.create(
-            model=self.model_name,
+            model=self.config.model_name,
             system=system_prompt,
             messages=[
                 {"role": "user", "content": prompt}
             ],
+            tools=tools,
             max_tokens=max_tokens
         )
         
         return response.content[0].text
     
-    def get_chat_completion(self, messages, max_tokens=None):
+    def get_chat_completion(self, messages, max_tokens=20, tools=NOT_GIVEN):
         """Get a chat completion from Anthropic.
         
         Args:
@@ -70,11 +63,16 @@ class AnthropicClient(LLMClient):
                 })
         
         response = self.client.messages.create(
-            model=self.model_name,
+            model=self.config.model_name,
             system=system_message,
             messages=chat_messages,
-            max_tokens=max_tokens
+            max_tokens=max_tokens,
+            tools=tools
         )
+
+        print (response.model_dump())
+        if len(response.content) == 0:
+            return "No response recieved"
         
         return response.content[0].text
     

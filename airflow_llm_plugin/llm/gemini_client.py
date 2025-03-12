@@ -4,24 +4,18 @@ from airflow_llm_plugin.llm.base import LLMClient
 
 class GeminiClient(LLMClient):
     """Client for Google Gemini models."""
-    
+
     def __init__(self, model_name=None):
         """Initialize the Gemini client.
         
         Args:
             model_name (str, optional): The model to use
         """
-        model_name = model_name or "gemini-1.5-pro"
-        super().__init__(model_name)
-        
-        # Initialize the Gemini client
-        api_key = os.environ.get("GOOGLE_API_KEY")
-        if not api_key:
-            raise ValueError("GOOGLE_API_KEY environment variable must be set")
-        
-        genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel(model_name=self.model_name)
+        super().__init__()
     
+        
+        genai.configure(api_key=self.config.api_key)
+        self.model = genai.GenerativeModel(model_name=self.config.model_name)
     def get_completion(self, prompt, system_prompt=None, max_tokens=None):
         """Get a completion from Gemini.
         

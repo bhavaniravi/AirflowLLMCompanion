@@ -6,23 +6,14 @@ from airflow_llm_plugin.llm.base import LLMClient
 class OpenAIClient(LLMClient):
     """Client for OpenAI models."""
     
-    def __init__(self, model_name=None):
+    def __init__(self, config):
         """Initialize the OpenAI client.
         
         Args:
             model_name (str, optional): The model to use (defaults to gpt-4o)
         """
-        # the newest OpenAI model is "gpt-4o" which was released May 13, 2024.
-        # do not change this unless explicitly requested by the user
-        model_name = model_name or "gpt-4o"
-        super().__init__(model_name)
-        
-        # Initialize the OpenAI client
-        api_key = os.environ.get("OPENAI_API_KEY")
-        if not api_key:
-            raise ValueError("OPENAI_API_KEY environment variable must be set")
-        
-        self.client = OpenAI(api_key=api_key)
+        super().__init__(config)
+        self.client = OpenAI(api_key=self.config.api_key)
     
     def get_completion(self, prompt, system_prompt=None, max_tokens=None):
         """Get a completion from OpenAI.
@@ -43,7 +34,7 @@ class OpenAIClient(LLMClient):
         messages.append({"role": "user", "content": prompt})
         
         response = self.client.chat.completions.create(
-            model=self.model_name,
+            model=self.config.model_name,
             messages=messages,
             max_tokens=max_tokens
         )
@@ -61,7 +52,7 @@ class OpenAIClient(LLMClient):
             str: The LLM's completion text
         """
         response = self.client.chat.completions.create(
-            model=self.model_name,
+            model=self.config.model_name,
             messages=messages,
             max_tokens=max_tokens
         )
