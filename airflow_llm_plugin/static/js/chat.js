@@ -30,11 +30,12 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch('/api/model-config')
             .then(response => response.json())
             .then(data => {
-                if (data.default) {
-                    const { provider, model_name } = data.default;
+                console.log(JSON.stringify(data))
+                if (data.provider && data.model_name) {
+                    const { provider, model_name } = data
                     modelInfo.textContent = `Using: ${provider} / ${model_name}`;
                 } else {
-                    modelInfo.textContent = 'No model configured';
+                    modelInfo.textContent = 'No model configured' + JSON.stringify(data);
                     modelInfo.className = 'badge bg-warning';
                 }
             })
