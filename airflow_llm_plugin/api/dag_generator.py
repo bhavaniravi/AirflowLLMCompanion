@@ -3,6 +3,7 @@ import re
 from datetime import datetime
 from airflow_llm_plugin.models import db, DAGPrompt
 from airflow_llm_plugin.api.model_config import get_default_llm_client
+from airflow_llm_plugin.llm.prompts import SYSTEM_PROMPT
 
 def save_prompt(name, prompt, description=None):
     """Save a DAG generation prompt.
@@ -149,7 +150,7 @@ Only respond with the Python code of the DAG, nothing else.
     llm_client = get_default_llm_client()
     
     # Generate the DAG code
-    dag_content = llm_client.get_completion(full_prompt, system_prompt)
+    dag_content = llm_client.get_completion(full_prompt, system_prompt, system_prompt=SYSTEM_PROMPT)
     
     # Clean up the response to ensure it's just Python code
     dag_content = dag_content.strip()

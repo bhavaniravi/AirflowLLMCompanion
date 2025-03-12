@@ -11,12 +11,12 @@ import os
 
 logger = logging.getLogger(__name__)
 
-class LLMProviderEnum(Enum):
+class LLMProviderEnum(str, Enum):
     OPENAI = "openai"
     ANTHROPIC = "anthropic"
     GEMINI = "gemini"
 
-class LLMModelEnum(Enum):
+class LLMModelEnum(str, Enum):
     GPT_3_5_TURBO = "gpt-3.5-turbo"
     GPT_4 = "gpt-4"
     CLAUDE_SONNET = "claude-3-5-sonnet-20241022"
@@ -42,4 +42,4 @@ def get_model_configs():
 def get_default_llm_client():
     """Get an LLM client using the default configuration."""
     config = get_model_configs()
-    return get_llm_client(config.provider, config.model_name)
+    return get_llm_client(config)
