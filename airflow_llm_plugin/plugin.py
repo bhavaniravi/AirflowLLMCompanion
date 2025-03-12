@@ -5,6 +5,7 @@ from airflow.www.app import csrf
 
 from airflow_llm_plugin.routes import register_routes
 from flask_appbuilder import expose, BaseView as AppBuilderBaseView
+from airflow_llm_plugin.models import ChatMessage
 
 class LLMView(AppBuilderBaseView):
     """AppBuilder view for LLM plugin."""
@@ -65,3 +66,5 @@ class LLMPlugin:
                 "category": "LLM Tools"
             }
         ]
+
+        self.models = [ChatMessage]

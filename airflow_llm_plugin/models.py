@@ -5,34 +5,12 @@ import sys
 from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from flask_sqlalchemy import SQLAlchemy
+from airflow.models import DagBag
+from airflow.utils.db import create_session
+from airflow.models.base import Base
 
-# Check for mock airflow modules that could have been created in main.py
 airflow_mock_available = 'airflow' in sys.modules and hasattr(sys.modules['airflow'], 'utils') and hasattr(sys.modules['airflow'].utils, 'db')
 
-# For a standalone Flask app, we use these imports
-try:
-    # Try to import Airflow-specific modules
-    if airflow_mock_available:
-        # Use mock modules if available (development mode)
-        from airflow.utils.db import create_session
-        # Use SQLAlchemy's Base
-        Base = declarative_base()
-        # Flag indicating mock Airflow environment
-        IN_AIRFLOW = True
-    else:
-        # Try actual Airflow imports (production mode)
-        from airflow.models import DagBag
-        from airflow.utils.db import create_session
-        from airflow.models.base import Base
-        # Flag to indicate we're in a real Airflow environment
-        IN_AIRFLOW = True
-except ImportError:
-    # If Airflow imports fail, we're in a standalone environment
-    Base = declarative_base()
-    create_session = None
-    IN_AIRFLOW = False
-
-# Create a db object for compatibility with both Airflow and standalone Flask
 db = SQLAlchemy(model_class=Base)
 
 class ChatMessage(Base):
@@ -48,14 +26,8 @@ class ChatMessage(Base):
     @classmethod
     def get_chat_history(cls, session_id, limit=50):
         """Get chat history for a session."""
-        if IN_AIRFLOW:
-            with create_session() as session:
-                messages = session.query(cls).filter(
-                    cls.session_id == session_id
-                ).order_by(cls.created_at.asc()).limit(limit).all()
-                return messages
-        else:
-            messages = db.session.query(cls).filter(
+        with create_session() as session:
+            messages = session.query(cls).filter(
                 cls.session_id == session_id
             ).order_by(cls.created_at.asc()).limit(limit).all()
             return messages
