@@ -2,7 +2,7 @@ from flask import request, jsonify, render_template, session, url_for
 from werkzeug.exceptions import BadRequest
 import uuid
 
-from airflow_llm_plugin.api.model_config import get_model_configs, save_model_config
+from airflow_llm_plugin.api.model_config import get_model_configs
 from airflow_llm_plugin.api.chat import process_chat_message, get_chat_history
 from airflow_llm_plugin.api.dag_generator import save_prompt, list_prompts, generate_dag_from_prompt_id, delete_prompt
 
@@ -21,33 +21,13 @@ def register_routes(blueprint, csrf):
     @blueprint.route('/api/model-config', methods=['GET'])
     def get_model_config_route():
         """Get all model configs, including the default one."""
-        configs = get_model_configs()
-        return jsonify(configs)
-    
-    @blueprint.route('/api/model-config', methods=['POST'])
-    @csrf.exempt
-    def save_model_config_route():
-        """Save a model config and set it as default."""
         try:
-            data = request.get_json()
-            provider = data.get('provider')
-            model_name = data.get('model_name')
-            
-            if not provider or not model_name:
-                raise BadRequest("Provider and model_name are required fields")
-            
-            config = save_model_config(provider, model_name)
-            return jsonify({
-                "success": True,
-                "config": {
-                    "id": config.id,
-                    "provider": config.provider,
-                    "model_name": config.model_name,
-                    "default": config.default
-                }
-            })
+            configs = get_model_configs()
         except Exception as e:
+            print(f"Error getting model configs: {e}")
             return jsonify({"success": False, "error": str(e)}), 400
+        
+        return configs.model_dump(mode="json")
     
     # Chat Routes
     @blueprint.route('/api/chat/session', methods=['GET'])

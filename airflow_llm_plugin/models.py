@@ -35,59 +35,6 @@ except ImportError:
 # Create a db object for compatibility with both Airflow and standalone Flask
 db = SQLAlchemy(model_class=Base)
 
-class LLMModelConfig(Base):
-    """Model for storing LLM configuration."""
-    __tablename__ = 'llm_model_config'
-    
-    id = Column(Integer, primary_key=True)
-    provider = Column(String(50), nullable=False)  # 'openai', 'anthropic', 'gemini'
-    model_name = Column(String(100), nullable=False)
-    default = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
-    
-    @classmethod
-    def get_default_config(cls):
-        """Get the default model configuration."""
-        with create_session() as session:
-            config = session.query(cls).filter(cls.default == True).first()
-            if not config:
-                # If no default is set, create one with OpenAI
-                config = cls(
-                    provider='openai',
-                    model_name='gpt-4o',
-                    default=True
-                )
-                session.add(config)
-                session.commit()
-            return config
-    
-    @classmethod
-    def set_default_config(cls, provider, model_name):
-        """Set a new default model configuration."""
-        with create_session() as session:
-            # Clear any existing defaults
-            session.query(cls).filter(cls.default == True).update({cls.default: False})
-            
-            # Find if the config already exists
-            config = session.query(cls).filter(
-                cls.provider == provider,
-                cls.model_name == model_name
-            ).first()
-            
-            if config:
-                config.default = True
-            else:
-                config = cls(
-                    provider=provider,
-                    model_name=model_name,
-                    default=True
-                )
-                session.add(config)
-            
-            session.commit()
-            return config
-    
 class ChatMessage(Base):
     """Model for storing chat messages."""
     __tablename__ = 'llm_chat_messages'
