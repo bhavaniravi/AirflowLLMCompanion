@@ -1,3 +1,7 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "airflow-llm-plugin"
 version = "0.1.0"
@@ -17,5 +21,15 @@ dependencies = [
     "sqlalchemy>=1.4.54",
 ]
 
+[tool.hatch.build.targets.wheel]
+packages = ["airflow_llm_plugin"]
+
+[tool.hatch.build]
+include = [
+    "airflow_llm_plugin/**/*.py",
+    "README.md",
+    "LICENSE",
+]
+
 [project.entry-points."airflow.plugins"]
-airflow_llm_plugin = "airflow_llm_plugin.AirflowLLMPlugin"
+airflow_llm_plugin = "airflow_llm_plugin:AirflowLLMPlugin"

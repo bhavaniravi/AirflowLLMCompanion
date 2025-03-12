@@ -4,8 +4,9 @@ from flask import Blueprint
 from airflow.www.app import csrf
 
 from airflow_llm_plugin.routes import register_routes
+from flask_appbuilder import expose, BaseView as AppBuilderBaseView
 
-class LLMView(BaseView):
+class LLMView(AppBuilderBaseView):
     """AppBuilder view for LLM plugin."""
     route_base = "/llm"
     
