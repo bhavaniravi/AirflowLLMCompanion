@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+
+{% block title %}LLM Model Configuration - Airflow LLM Plugin{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-cogs me-2"></i>LLM Model Configuration
+                </h5>
+                <div>
+                    <span id="status-indicator" class="badge bg-secondary">Checking status...</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    Configure which LLM provider and model to use for all plugin features. The selected model will be used for chat and DAG generation.
+                </p>
+                
+                <div id="api-keys-alert" class="alert alert-warning d-none" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <span id="api-keys-message"></span>
+                </div>
+                
+                <form id="model-config-form">
+                    <div class="mb-3">
+                        <label for="provider" class="form-label">LLM Provider</label>
+                        <select class="form-select" id="provider" name="provider" required>
+                            <option value="" disabled selected>Select a provider...</option>
+                            <!-- Provider options will be loaded dynamically -->
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="model_name" class="form-label">Model</label>
+                        <select class="form-select" id="model_name" name="model_name" required disabled>
+                            <option value="" disabled selected>Select a model...</option>
+                            <!-- Model options will be loaded dynamically -->
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> Save Configuration
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>Current Configuration
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="current-config-container">
+                    <p class="text-muted">Loading current configuration...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get DOM elements
+        const providerSelect = document.getElementById('provider');
+        const modelSelect = document.getElementById('model_name');
+        const configForm = document.getElementById('model-config-form');
+        const statusIndicator = document.getElementById('status-indicator');
+        const currentConfigContainer = document.getElementById('current-config-container');
+        const apiKeysAlert = document.getElementById('api-keys-alert');
+        const apiKeysMessage = document.getElementById('api-keys-message');
+        
+        // Function to check if API keys are set
+        function checkRequiredApiKeys(provider) {
+            let keyName = '';
+            let keyUrl = '';
+            
+            switch(provider) {
+                case 'openai':
+                    keyName = 'OPENAI_API_KEY';
+                    keyUrl = 'https://platform.openai.com/account/api-keys';
+                    break;
+                case 'anthropic':
+                    keyName = 'ANTHROPIC_API_KEY';
+                    keyUrl = 'https://console.anthropic.com/settings/keys';
+                    break;
+                case 'gemini':
+                    keyName = 'GOOGLE_API_KEY';
+                    keyUrl = 'https://makersuite.google.com/app/apikey';
+                    break;
+                default:
+                    return;
+            }
+            
+            // Make a placeholder check - in a real implementation, 
+            // we'd check if the environment variable is set on the server
+            fetch('/api/model-config')
+                .then(response => response.json())
+                .then(data => {
+                    const config = data.configs.find(c => c.provider === provider);
+                    if (config) {
+                        apiKeysAlert.classList.add('d-none');
+                    } else {
+                        apiKeysMessage.innerHTML = `
+                            The <strong>${keyName}</strong> environment variable may need to be set in your Airflow environment. 
+                            <a href="${keyUrl}" target="_blank">Get your API key here</a> and add it to your Airflow configuration.
+                        `;
+                        apiKeysAlert.classList.remove('d-none');
+                    }
+                });
+        }
+        
+        // Function to load providers and models
+        function loadProviders() {
+            fetch('/api/model-config')
+                .then(response => response.json())
+                .then(data => {
+                    // Check if we have a default configuration
+                    if (data.default) {
+                        statusIndicator.className = 'badge bg-success';
+                        statusIndicator.textContent = 'Model configured';
+                        displayCurrentConfig(data.default);
+                    } else {
+                        statusIndicator.className = 'badge bg-warning';
+                        statusIndicator.textContent = 'Not configured';
+                    }
+                    
+                    // Clear and populate the provider select
+                    providerSelect.innerHTML = '<option value="" disabled selected>Select a provider...</option>';
+                    
+                    data.providers.forEach(provider => {
+                        const option = document.createElement('option');
+                        option.value = provider.id;
+                        option.textContent = provider.name;
+                        option.dataset.models = JSON.stringify(provider.models);
+                        
+                        // Pre-select the default provider if available
+                        if (data.default && data.default.provider === provider.id) {
+                            option.selected = true;
+                            populateModels(provider.models, data.default.model_name);
+                        }
+                        
+                        providerSelect.appendChild(option);
+                    });
+                    
+                    // Enable the provider select
+                    providerSelect.disabled = false;
+                    
+                    // Check if API keys are set for the current provider
+                    if (data.default) {
+                        checkRequiredApiKeys(data.default.provider);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading model config:', error);
+                    statusIndicator.className = 'badge bg-danger';
+                    statusIndicator.textContent = 'Error loading configuration';
+                });
+        }
+        
+        // Function to populate the model select based on the selected provider
+        function populateModels(models, selectedModel = null) {
+            // Clear and reset the model select
+            modelSelect.innerHTML = '<option value="" disabled selected>Select a model...</option>';
+            
+            // Add models to the select
+            models.forEach(model => {
+                const option = document.createElement('option');
+                option.value = model;
+                option.textContent = model;
+                
+                // Pre-select the model if it matches the selected model
+                if (selectedModel && model === selectedModel) {
+                    option.selected = true;
+                }
+                
+                modelSelect.appendChild(option);
+            });
+            
+            // Enable the model select
+            modelSelect.disabled = false;
+        }
+        
+        // Function to display the current configuration
+        function displayCurrentConfig(config) {
+            if (config) {
+                currentConfigContainer.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-2">
+                                <strong>Provider:</strong> ${config.provider}
+                            </div>
+                            <div>
+                                <strong>Model:</strong> ${config.model_name}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                currentConfigContainer.innerHTML = `
+                    <p class="text-muted">No configuration set yet. Please select a provider and model above.</p>
+                `;
+            }
+        }
+        
+        // Event listener for provider change
+        providerSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const models = JSON.parse(selectedOption.dataset.models || '[]');
+            
+            populateModels(models);
+            checkRequiredApiKeys(this.value);
+        });
+        
+        // Event listener for form submission
+        configForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const provider = providerSelect.value;
+            const modelName = modelSelect.value;
+            
+            if (!provider || !modelName) {
+                alert('Please select both a provider and a model');
+                return;
+            }
+            
+            statusIndicator.className = 'badge bg-info';
+            statusIndicator.textContent = 'Saving...';
+            
+            fetch('/api/model-config', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    provider: provider,
+                    model_name: modelName
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    statusIndicator.className = 'badge bg-success';
+                    statusIndicator.textContent = 'Configuration saved';
+                    displayCurrentConfig(data.config);
+                } else {
+                    statusIndicator.className = 'badge bg-danger';
+                    statusIndicator.textContent = 'Error saving configuration';
+                    alert('Error saving configuration: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error saving model config:', error);
+                statusIndicator.className = 'badge bg-danger';
+                statusIndicator.textContent = 'Error saving configuration';
+                alert('Error saving configuration: ' + error.message);
+            });
+        });
+        
+        // Load providers on page load
+        loadProviders();
+    });
+</script>
+{% endblock %}

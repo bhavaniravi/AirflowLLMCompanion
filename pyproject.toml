@@ -1,0 +1,21 @@
+[project]
+name = "airflow-llm-plugin"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.11"
+dependencies = [
+    "anthropic>=0.49.0",
+    "apache-airflow==2.10.5",
+    "email-validator>=2.2.0",
+    "flask==2.2.5",
+    "flask-sqlalchemy<3.1.0",
+    "google-generativeai>=0.8.4",
+    "gunicorn>=23.0.0",
+    "langchain>=0.3.20",
+    "openai>=1.66.2",
+    "psycopg2-binary>=2.9.10",
+    "sqlalchemy>=1.4.54",
+]
+
+[project.entry-points."airflow.plugins"]
+airflow_llm_plugin = "airflow_llm_plugin.AirflowLLMPlugin"
