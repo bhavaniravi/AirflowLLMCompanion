@@ -4,14 +4,14 @@ from airflow_llm_plugin.llm.anthropic_client import AnthropicClient
 from airflow_llm_plugin.llm.gemini_client import GeminiClient
 
 
-def get_llm_client(config):
+def get_llm_client(config, tools):
     """Factory function to get the appropriate LLM client."""
     provider = config.provider.value
     if provider == 'openai':
-        return OpenAIClient(config)
+        return OpenAIClient(config, tools)
     elif provider == 'anthropic':
-        return AnthropicClient(config)
+        return AnthropicClient(config, tools)
     elif provider == 'gemini':
-        return GeminiClient(config)
+        return GeminiClient(config, tools)
     else:
         raise ValueError(f"Unsupported LLM provider: {provider}")

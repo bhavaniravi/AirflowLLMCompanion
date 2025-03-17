@@ -2,21 +2,58 @@ import os
 import sys
 from anthropic import Anthropic, NOT_GIVEN
 from airflow_llm_plugin.llm.base import LLMClient
+from airflow_llm_plugin.mcp_tools.mcp_client import call_tool
+import asyncio
 
 class AnthropicClient(LLMClient):
     """Client for Anthropic Claude models."""
     
-    def __init__(self, model_name=None):
-        """Initialize the Anthropic client.
-        
-        Args:
-            model_name (str, optional): The model to use
-        """
-        super().__init__(model_name)
-        
+    def __init__(self, config, tools):
+        super().__init__(config)
+        self.tools = tools
         self.client = Anthropic(api_key=self.config.api_key)
-    
-    def get_completion(self, prompt, system_prompt=None, max_tokens=20, tools=NOT_GIVEN):
+        self.final_text = []
+
+
+    def process_response(self, response, messages):
+        # print ("\n\n==========messages=========\n\n", messages, "\n\n", response)
+
+        assistant_message_content = []
+        for content in response.content:
+            print ("processing......",content.type, content.type=='text')
+            if content.type == 'text':
+                self.final_text.append(content.text)
+                assistant_message_content.append(content)
+            elif content.type == 'tool_use':
+                tool_name = content.name
+                tool_args = content.input
+
+                # Execute tool call
+                result = asyncio.run(call_tool(tool_name, tool_args))
+                # print ("\n\n\n ============ \n\n tool call result is here", result)
+                # final_text.append(f"[Calling tool {tool_name} with args {tool_args}]")
+
+                assistant_message_content.append(content)
+                messages.append({
+                    "role": "assistant",
+                    "content": assistant_message_content
+                })
+                messages.append({
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "tool_result",
+                            "tool_use_id": content.id,
+                            "content": result.content
+                        }
+                    ]
+                })
+                self.get_chat_completion(messages)
+
+        print ("======================final text========", self.final_text)
+        return "\n".join(self.final_text)
+
+    def get_completion(self, prompt, system_prompt=None, max_tokens=20):
         """Get a completion from Anthropic.
         
         Args:
@@ -27,19 +64,19 @@ class AnthropicClient(LLMClient):
         Returns:
             str: The LLM's completion text
         """
-        response = self.client.messages.create(
+        response = self.client.beta.messages.create(
             model=self.config.model_name,
             system=system_prompt,
             messages=[
                 {"role": "user", "content": prompt}
             ],
-            tools=tools,
-            max_tokens=max_tokens
+            tools=self.tools,
+            max_tokens=max_tokens,
+            # betas=["token-efficient-tools-2025-02-19"] # 'claude-3-5-sonnet-20241022' does not support token-efficient tool use.
         )
-        
-        return response.content[0].text
+        return self.process_response(response, [])
     
-    def get_chat_completion(self, messages, max_tokens=20, tools=NOT_GIVEN):
+    def get_chat_completion(self, messages, max_tokens=500):
         """Get a chat completion from Anthropic.
         
         Args:
@@ -62,19 +99,18 @@ class AnthropicClient(LLMClient):
                     "content": msg['content']
                 })
         
-        response = self.client.messages.create(
+        print ("getting chat completions", chat_messages)
+        response = self.client.beta.messages.create(
             model=self.config.model_name,
             system=system_message,
             messages=chat_messages,
             max_tokens=max_tokens,
-            tools=tools
+            tools=self.tools,
+            # betas=["token-efficient-tools-2025-02-19"],
         )
 
-        print (response.model_dump())
-        if len(response.content) == 0:
-            return "No response recieved"
+        return self.process_response(response, messages)
         
-        return response.content[0].text
     
     def get_available_models(self):
         """Get a list of available Anthropic models.
