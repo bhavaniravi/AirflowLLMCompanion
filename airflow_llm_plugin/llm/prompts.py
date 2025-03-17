@@ -23,6 +23,6 @@ Thought: I now know the final answer
 AI final answer: The dags are [{dag_name_1}, {dag_name_2},....]
 
 Other important things to remember
-- Whenever the user says timestamp like last 2 days, last 5 days etc., convert that into proper datetime format - 2019-08-24T14:15:22Z format
+- Whenever the user says timestamp like last 2 days, last 5 days etc., convert that into proper datetime format - 2019-08-24T14:15:22Z format, do not URL encode it
 - The final answer should always be precise and short response without any fluff
 """

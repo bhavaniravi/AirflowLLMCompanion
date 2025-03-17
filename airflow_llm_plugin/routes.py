@@ -5,6 +5,7 @@ import uuid
 from airflow_llm_plugin.api.model_config import get_model_configs
 from airflow_llm_plugin.api.chat import process_chat_message, get_chat_history
 from airflow_llm_plugin.api.dag_generator import save_prompt, list_prompts, generate_dag_from_prompt_id, delete_prompt
+import logging as logger
 
 def register_routes(blueprint, csrf):
     """Register routes for the plugin."""
@@ -71,6 +72,7 @@ def register_routes(blueprint, csrf):
                 "session_id": session_id
             })
         except Exception as e:
+            logger.exception("error occurred")
             return jsonify({"success": False, "error": str(e)}), 400
     
     # DAG Generator Routes

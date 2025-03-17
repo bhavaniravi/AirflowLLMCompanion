@@ -5,6 +5,7 @@ from airflow_llm_plugin.llm.gemini_client import GeminiClient
 from airflow.configuration import conf
 from pydantic import BaseModel
 from pydantic.types import Enum
+from airflow_llm_plugin.mcp_tools.mcp_client import load_tools
 import logging
 import os
 
@@ -18,13 +19,14 @@ class LLMProviderEnum(str, Enum):
 
 class LLMModelEnum(str, Enum):
     GPT_3_5_TURBO = "gpt-3.5-turbo"
-    GPT_4 = "gpt-4"
+    GPT_4 = "gpt-4o"
     CLAUDE_SONNET = "claude-3-5-sonnet-20241022"
 
 class LLMModelConfig(BaseModel):
     provider: LLMProviderEnum
     model_name: LLMModelEnum
     api_key: str
+    base_url: str | None = None
 
 def get_model_configs():
     """Get all saved model configurations."""
@@ -35,11 +37,14 @@ def get_model_configs():
     provider = conf.get('airflow_llm_plugin', 'llm_provider')
     model = conf.get('airflow_llm_plugin', 'llm_model')
     api_key = os.environ.get('AIRFLOW__AIRFLOW_LLM_PLUGIN__LLM_API_KEY') or conf.get('airflow_llm_plugin', 'llm_api_key')
-
-    config = LLMModelConfig(provider=provider, model_name=model, api_key=api_key)
+    base_url = os.environ.get('AIRFLOW__AIRFLOW_LLM_PLUGIN__LLM_BASE_URL') or conf.get('airflow_llm_plugin', 'llm_base_url', fallback=None)
+    config = LLMModelConfig(provider=provider, model_name=model, api_key=api_key, base_url=base_url)
     return config
+
 
 def get_default_llm_client():
     """Get an LLM client using the default configuration."""
     config = get_model_configs()
-    return get_llm_client(config)
+    tools = load_tools()
+    # tools = tools[:1]
+    return get_llm_client(config, tools)

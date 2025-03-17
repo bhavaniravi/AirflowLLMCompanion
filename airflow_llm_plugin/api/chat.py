@@ -1,7 +1,6 @@
 from airflow_llm_plugin.models import db, ChatMessage
 from airflow_llm_plugin.api.model_config import get_default_llm_client
 from airflow_llm_plugin.llm.prompts import SYSTEM_PROMPT
-from airflow_llm_plugin.mcp_tools.mcp_client import load_tools
 
 def process_chat_message(message, session_id):
     """Process a chat message and get a response from the LLM.
@@ -21,19 +20,17 @@ def process_chat_message(message, session_id):
     )
     db.session.add(user_message)
     db.session.commit()
-    
-    # Get chat history
-    history = get_message_history(session_id)
-    
+    history = [{
+        "role": "user",
+        "content": message
+    }]
     # Get the LLM client
     llm_client = get_default_llm_client()
     
     try:
         print (history)
         # Send the message to the LLM
-        tools = load_tools()
-        print (tools)
-        response_text = llm_client.get_chat_completion(history, tools=tools)
+        response_text = llm_client.get_chat_completion(history)
         
         # Save the assistant's response
         assistant_message = ChatMessage(
@@ -71,9 +68,9 @@ def get_message_history(session_id, limit=20):
     Returns:
         list: List of message dictionaries with role and content
     """
-    messages = db.session.query(ChatMessage).filter(
-        ChatMessage.session_id == session_id
-    ).order_by(ChatMessage.created_at.asc()).limit(limit).all()
+    # messages = db.session.query(ChatMessage).filter(
+    #     ChatMessage.session_id == session_id
+    # ).order_by(ChatMessage.created_at.asc()).limit(limit).all()
     
     # Add a system message to provide context
     history = [
@@ -83,12 +80,12 @@ def get_message_history(session_id, limit=20):
         }
     ]
     
-    # Add the chat history
-    for msg in messages:
-        history.append({
-            "role": msg.role,
-            "content": msg.content
-        })
+    # # Add the chat history
+    # for msg in messages:
+    #     history.append({
+    #         "role": msg.role,
+    #         "content": msg.content
+    #     })
     
     return history
 
