@@ -37,7 +37,6 @@
             fetch('/api/model-config')
                 .then(response => response.json())
                 .then(data => {
-                    console.log(JSON.stringify(data))
                     provider.innerHTML = data.provider
                     model.innerHTML = data.model_name
                 })
