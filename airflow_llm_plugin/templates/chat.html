@@ -2,126 +2,51 @@
 
 {% block title %}LLM Chat - Airflow LLM Plugin{% endblock %}
 
-{% block head_extra %}
-<style>
-    .chat-container {
-        height: calc(100vh - 240px);
-        min-height: 400px;
-        display: flex;
-        flex-direction: column;
-    }
-    
-    .messages-container {
-        flex-grow: 1;
-        overflow-y: auto;
-        padding: 1rem;
-        border-radius: 0.25rem;
-    }
-    
-    .message {
-        margin-bottom: 1rem;
-        max-width: 85%;
-    }
-    
-    .message-user {
-        align-self: flex-end;
-        margin-left: auto;
-    }
-    
-    .message-assistant {
-        align-self: flex-start;
-        margin-right: auto;
-    }
-    
-    .message-content {
-        padding: 0.75rem;
-        border-radius: 0.5rem;
-    }
-    
-    .message-user .message-content {
-        background-color: var(--bs-primary);
-        color: white;
-        border-top-right-radius: 0;
-    }
-    
-    .message-assistant .message-content {
-        background-color: var(--bs-dark);
-        border: 1px solid var(--bs-secondary);
-        border-top-left-radius: 0;
-    }
-    
-    .typing-indicator {
-        display: inline-block;
-        width: 1.5rem;
-        text-align: center;
-    }
-    
-    .message pre {
-        background-color: rgba(0, 0, 0, 0.2);
-        padding: 0.5rem;
-        border-radius: 0.25rem;
-        overflow-x: auto;
-        max-width: 100%;
-    }
-    
-    .message code {
-        font-family: monospace;
-        font-size: 0.9em;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="row">
-    <div class="col-12">
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">
-                    <i class="fas fa-comments me-2"></i>Chat with Airflow LLM
-                </h5>
-                <div>
-                    <span id="model-info" class="badge bg-info">Loading model info...</span>
-                </div>
-            </div>
-            <div class="card-body chat-container">
-                <div id="messages-container" class="messages-container d-flex flex-column">
-                    <!-- Messages will be added here dynamically -->
-                    <div class="message message-assistant">
-                        <div class="message-content">
-                            <p class="mb-0">👋 Hello! I'm your Airflow assistant. How can I help you with your workflow automation today?</p>
-                        </div>
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <!-- Chat Card -->
+            <div class="card mb-4 shadow-sm bg-light">
+                <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-comments me-2"></i>Airflow LLM Companion
+                    </h5>
+                    <div>
+                        <span id="model-info" class="badge bg-warning text-dark">No model configured</span>
                     </div>
                 </div>
-                
+                <div class="card-body">
+                    <p>
+                        This feature allows you to chat with an LLM integrated with Airflow. You can ask questions about
+                        your Airflow tasks, get help with DAG configuration, troubleshoot issues, or ask the AI for
+                        general workflow automation advice.
+                    </p>
+                </div>
+            </div>
+            <div class="card mb-4 shadow-sm bg-light">
+                <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
+                    <h5 class="mb-0 p-10">
+                        <i class="fas fa-comments me-2"></i>Chat
+                    </h5>
+                </div>
+                <div class="card-body chat-container">
+                    <div id="messages-container" class="messages-container d-flex flex-column">
+                        <p>start of message</p>
+                    </div>
+                </div>
+                <!-- Input Section -->
                 <div class="input-group mt-3">
-                    <input type="text" id="message-input" class="form-control" placeholder="Ask something about Airflow..." aria-label="Your message">
+                    <input type="text" id="message-input" class="form-control"
+                        placeholder="Ask something about Airflow..." aria-label="Your message">
                     <button id="send-button" class="btn btn-primary">
                         <i class="fas fa-paper-plane"></i>
                     </button>
                 </div>
             </div>
-        </div>
-        
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-info-circle me-2"></i>About LLM Chat
-                </h5>
-            </div>
-            <div class="card-body">
-                <p>
-                    This feature allows you to chat with an LLM integrated with Airflow. 
-                    You can ask questions about your Airflow tasks, get help with DAG configuration, 
-                    troubleshoot issues, or ask the AI for general workflow automation advice.
-                </p>
-                <p>
-                    The model being used is configured in the <a href="{{ url_for('airflow_llm_plugin.model_config_page') }}">Model Config</a> page.
-                </p>
-                <div class="alert alert-info">
-                    <i class="fas fa-lightbulb me-2"></i>
-                    <strong>Tip:</strong> Try asking about Airflow best practices, DAG design patterns, or specific operator usage.
-                </div>
-            </div>
+
+            <!-- About Section -->
+
         </div>
     </div>
 </div>

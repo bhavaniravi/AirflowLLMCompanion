@@ -30,7 +30,6 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch('/api/model-config')
             .then(response => response.json())
             .then(data => {
-                console.log(JSON.stringify(data))
                 if (data.provider && data.model_name) {
                     const { provider, model_name } = data
                     modelInfo.textContent = `Using: ${provider} / ${model_name}`;

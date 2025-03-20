@@ -100,3 +100,118 @@ pre code {
     background-color: rgba(220, 53, 69, 0.2);
     color: var(--bs-danger);
 }
+
+.chat-container {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  
+  .messages-container {
+    padding: 10px;
+    max-height: 500px;
+    overflow-y: auto;
+  }
+  
+  .message {
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    word-wrap: break-word;
+    white-space: pre-line;
+  }
+  
+  .message-user {
+    background-color: #d1ecf1;
+    align-self: flex-end;
+    text-align: right;
+  }
+  
+  .message-assistant {
+    background-color: #f1f1f1;
+    align-self: flex-start;
+    text-align: left;
+  }
+  
+  .message-content {
+    font-size: 14px;
+  }
+  
+  .input-group {
+    position: relative;
+    width: 100%;
+  }
+  
+  #message-input {
+    border-radius: 25px;
+    padding: 10px;
+  }
+  
+  #send-button {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-radius: 50%;
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .card-header {
+    font-weight: bold;
+  }
+  
+  .card-header i {
+    font-size: 1.2em;
+  }
+  
+  .card {
+    background-color: #fafafa;  /* Subtle background for the chat cards */
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .card-header {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .card-header i {
+    font-size: 1.2em;
+  }
+  
+  .card-body {
+    padding: 15px;
+  }
+  
+  .alert-info {
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+    color: #0c5460;
+  }
+  
+  .badge.bg-warning {
+    background-color: #ffc107;
+  }
+  
+  /* Additional Styles for the Input Area */
+  .input-group {
+    margin-top: 10px;
+  }
+  
+  .input-group .form-control {
+    border-radius: 20px;
+    font-size: 16px;
+  }
+  
+  .input-group .btn {
+    border-radius: 50%;
+    background-color: #007bff;
+    color: white;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .message {
+      max-width: 100%;
+    }
+  }
