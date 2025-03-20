@@ -55,22 +55,10 @@ class OpenAIClient(LLMClient):
             mcp_servers=["airflow_api_mcp"]
         )
         self.context = AgentContext()
-    
-    def get_completion(self, prompt, max_tokens=None):
-        """Get a completion from OpenAI.
-        
-        Args:
-            prompt (str): The user prompt to send to the LLM
-            system_prompt (str, optional): System instructions for the LLM
-            max_tokens (int, optional): Maximum tokens for the response
-            
-        Returns:
-            str: The LLM's completion text
-        """
-        run_result = asyncio.run( Runner.run(self.agent, input=prompt, context=self.context))
-        return run_result.final_output
+
     
     def get_chat_completion(self, messages, max_tokens=None):
+        print (messages)
         run_result = asyncio.run(Runner.run(self.agent, input=messages, context=self.context))
         return run_result.final_output
     

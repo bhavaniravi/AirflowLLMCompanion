@@ -6,21 +6,6 @@ class LLMClient(ABC):
     def __init__(self, config):
         """Initialize the LLM client with a specific model."""
         self.config = config
-
-    
-    @abstractmethod
-    def get_completion(self, prompt, system_prompt=None, max_tokens=None):
-        """Get a completion from the LLM.
-        
-        Args:
-            prompt (str): The user prompt to send to the LLM
-            system_prompt (str, optional): System instructions for the LLM
-            max_tokens (int, optional): Maximum tokens for the response
-            
-        Returns:
-            str: The LLM's completion text
-        """
-        pass
     
     @abstractmethod
     def get_chat_completion(self, messages, max_tokens=None):
