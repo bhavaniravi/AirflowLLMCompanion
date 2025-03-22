@@ -22,3 +22,14 @@ https://github.com/yangkyeongmo/mcp-server-apache-airflow
 In `mcp_client.py` file change the path to the cloned repo path.
 
 We will change this in the future
+
+## Airflow config
+
+```
+[airflow_llm_plugin]
+enabled = True
+
+llm_provider=gemini
+llm_model=gemini-2.0-pro-exp-02-05
+llm_api_key=<api-key-here>
+```
