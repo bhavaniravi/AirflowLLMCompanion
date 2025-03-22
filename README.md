@@ -51,14 +51,8 @@ After installation, the plugin will automatically register with Airflow. You'll 
 
 ### Setup Development Environment
 
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/airflow-llm-plugin.git
-cd airflow-llm-plugin
+Checkout [Contributing.md](./Contributing.md) file
 
-# Install in development mode
-pip install -e .
-```
 
 ### Database Models
 

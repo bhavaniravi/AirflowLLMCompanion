@@ -28,7 +28,7 @@ def process_chat_message(message, session_id):
     llm_client = get_default_llm_client()
     
     try:
-        print (history)
+        # print (history)
         # Send the message to the LLM
         response_text = llm_client.get_chat_completion(history)
         

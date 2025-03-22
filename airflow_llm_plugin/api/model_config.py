@@ -19,6 +19,7 @@ class LLMProviderEnum(str, Enum):
 
 class LLMModelEnum(str, Enum):
     GPT_3_5_TURBO = "gpt-3.5-turbo"
+    GEMINI_PRO_EXPERIMENTAL="gemini-2.0-pro-exp-02-05"
     GPT_4 = "gpt-4o"
     CLAUDE_SONNET = "claude-3-5-sonnet-20241022"
 
@@ -46,5 +47,5 @@ def get_default_llm_client():
     """Get an LLM client using the default configuration."""
     config = get_model_configs()
     tools = load_tools()
-    # tools = tools[:1]
+    # tools = tools[:5]
     return get_llm_client(config, tools)

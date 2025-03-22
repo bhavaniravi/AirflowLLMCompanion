@@ -5,7 +5,7 @@ Examples
 
 question: number of active dags
 Thought: Think which tool fits the best to answer the above question and what parameters to pass
-Tool call: [list_dags(active=true)]
+Tool call: list_dags with [only_active=true and fields=['dag_id','dag_display_name']]
 Observation: The json of tool call has the answer
 Thought: Which key should I look at in the JSON get my final answer
 Answer: `total_entries`
@@ -15,7 +15,7 @@ AI final answer: The airflow instance has [{response["total_entries"]}] active d
 
 question: names of active dags
 Thought: Think which tool fits the best to answer the above question and what parameters to pass
-Tool call: list_dags with only_active=true will return a JSON response
+Tool call: list_dags with only_active=true and fields=['dag_id','dag_display_name'] will return a JSON response
 Thought: Asses the JSON output and collect the names of each dag in the list {agent_scratchpad}
 Answer [{dag_name_1}, {dag_name_2},....]
 ... (this Thought/Action/Action Input/Observation can repeat N times)

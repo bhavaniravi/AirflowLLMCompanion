@@ -2,7 +2,7 @@ import os
 import sys
 from anthropic import Anthropic, NOT_GIVEN
 from airflow_llm_plugin.llm.base import LLMClient
-from airflow_llm_plugin.mcp_tools.mcp_client import call_tool, process_call_tool_result
+from airflow_llm_plugin.mcp_tools.mcp_client import call_tool
 import asyncio
 
 
